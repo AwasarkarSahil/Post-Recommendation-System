@@ -25,20 +25,6 @@ The data is provided in three separate CSV files:
 
 ---
 
-## 📊 Exploratory Data Analysis (EDA)
-
-Key insights were drawn from visualizing the data distributions.
-
-| Engagement Distribution | User Age Distribution |
-| :---: | :---: |
-| <img src="https://i.imgur.com/r6E8c9H.png" alt="Engagement Distribution Plot" width="400"/> | <img src="https://i.imgur.com/qR8b9mU.png" alt="User Age Distribution Plot" width="400"/> |
-| **Observation**: The target variable `engagement` is fairly balanced, with slightly more non-engagements (0) than engagements (1). | **Observation**: The user base is primarily young, with most users between the ages of 20 and 35. |
-
-| Gender Distribution | Content Type Distribution |
-| :---: | :---: |
-| <img src="https://i.imgur.com/J3t5Xv8.png" alt="Gender Distribution Plot" width="400"/> | <img src="https://i.imgur.com/gq5c9gM.png" alt="Content Type Distribution Plot" width="400"/> |
-| **Observation**: The dataset has a relatively even distribution across Female, Male, and Other gender identities. | **Observation**: Posts are distributed across three content types: video, image, and text. |
-
 ---
 
 ## 🛠️ Methodology & Feature Engineering
@@ -47,8 +33,65 @@ Key insights were drawn from visualizing the data distributions.
 
 A key feature, `interest_match`, was created to measure the alignment between a user's interests and a post's tags. It is calculated as the count of common elements between a user's `top_3_interests` and the post's `tags`.
 
-```python
 # Feature: Interest match count
 merged_df['interest_match'] = merged_df.apply(
     lambda row: len(set(row['top_3_interests']) & set(row['tags'])), axis=1
 )
+
+
+### Preprocessing Pipeline
+A `ColumnTransformer` from scikit-learn was used to apply different preprocessing steps to different types of columns in an organized pipeline:
+
+* **Numerical Features** (`age`, `past_engagement_score`, `interest_match`): Scaled using `StandardScaler`.
+* **Categorical Features** (`gender`, `content_type`): Encoded using `OneHotEncoder`.
+* **Multi-Label Features** (`top_3_interests`, `tags`): Transformed into binary columns using `MultiLabelBinarizer` and passed through without further scaling.
+
+---
+
+### 📈 Model Performance
+A **Logistic Regression** model was trained on the preprocessed data. The `class_weight='balanced'` parameter was used to handle the slight class imbalance.
+
+The model's performance on the test set is summarized below:
+
+| Metric | Score |
+| :--- | :--- |
+| **Accuracy** | 0.485 |
+| **ROC AUC Score** | 0.488 |
+| **Precision (Class 1)**| 0.48 |
+| **Recall (Class 1)** | 0.45 |
+| **F1-Score (Class 1)** | 0.47 |
+
+
+---
+
+### 💡 Conclusion & Next Steps
+The initial Logistic Regression model achieved an accuracy of **48.5%** and a ROC AUC of **0.488**. This performance is slightly below the 0.5 baseline of a random guess, indicating that the current features and model are not sufficient to effectively predict user engagement.
+
+This project successfully establishes a baseline. To improve performance, future work could include:
+
+* **Exploring More Complex Models**: Algorithms like Gradient Boosting (XGBoost, LightGBM) or Random Forest might capture more complex patterns in the data.
+* **Advanced Feature Engineering**: Create more interaction features, such as the popularity of a post's creator or time-based features if timestamps were available.
+* **Hyperparameter Tuning**: Optimize the model's parameters using techniques like GridSearchCV or RandomizedSearchCV.
+* **Collect More Data**: A larger dataset with more diverse features could significantly enhance the model's predictive power.
+
+---
+
+### ⚙️ How to Run
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
+    cd your-repo-name
+    ```
+
+2.  **Install the required libraries:**
+    ```bash
+    pip install pandas numpy matplotlib seaborn scikit-learn
+    ```
+    
+
+3.  **Place the data files** (`Users.csv`, `Posts.csv`, `Engagements.csv`) in the root directory of the project.
+
+4.  **Run the Jupyter Notebook:**
+    ```bash
+    jupyter notebook Assesment_test.ipynb
+    ```
